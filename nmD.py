@@ -18,19 +18,22 @@ class DynamicAxis:
         self.name = name
         self.isInput = isInput
         if not self.validate_equation(equation):
-            raise ValueError("Equation is not valid; must have two list parameters, and must return an integer")
+            raise ValueError("Equation is not valid; must have two list parameters, and must return an float")
         self.equation = equation
         self.label = label
     
-    def validate_equation(func: Callable) -> bool:
+    def validate_equation(self, func: Callable) -> bool:
         params = inspect.signature(func).parameters
         hints = get_type_hints(func)
         if len(params) != 2:
+            print("Parameter count invalid")
             return False
         for name in list(params.keys()):
             if hints.get(name) is not list:
+                print(f"Parameter {name} type invalid")
                 return False
-        if hints.get('return') is not int:
+        if hints.get('return') is not float:
+            print("Return type invalid")
             return False
         return True
 
@@ -40,15 +43,10 @@ class Grid:
         self.outputAxes = outputAxes
         self.inputAxes = inputAxes
         self.table = table
-    
-    def countOf(self, isDynamic: bool, isInput: bool) -> int:
-        count = 0
-        for axis in self.inputAxes.values() if isInput else self.outputAxes.values():
-            if (isDynamic and isinstance(axis, DynamicAxis)) or (not isDynamic and isinstance(axis, StaticAxis)):
-                count += 1
-        return count
 
     def addStaticAxis(self, axis: StaticAxis) -> None:
+        if axis.name in self.inputAxes or axis.name in self.outputAxes:
+            raise ValueError(f"An axis with the name {axis.name} already exists.")
         if axis.isInput:
             self.inputAxes.append(axis)
         else:
@@ -58,12 +56,8 @@ class Grid:
         if axis.name in self.inputAxes or axis.name in self.outputAxes:
             raise ValueError(f"An axis with the name {axis.name} already exists.")
         if axis.isInput:
-            if self.countOf(isDynamic=True, isInput=True) >= 2:
-                raise ValueError("Only one dynamic input axis is allowed.")
             self.inputAxes.append(axis)
         else:
-            if self.countOf(isDynamic=True, isInput=False) >= 2:
-                raise ValueError("Only one dynamic output axis is allowed.")
             self.outputAxes.append(axis)
     
     def setTable(self, table) -> None:
@@ -94,8 +88,9 @@ class Grid:
             for index, value in enumerate(self.inputAxes):
                 row[value.name] = combinations[i][index]
             
-
-
+            for index, value in enumerate(self.outputAxes):
+                if isinstance(value, DynamicAxis):
+                    row[value.name] = value.equation(row, self.inputAxes)
 
     def graphTable(self) -> None:
         img = None
