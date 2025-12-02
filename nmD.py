@@ -59,6 +59,11 @@ class Grid:
             self.inputAxes.append(axis)
         else:
             self.outputAxes.append(axis)
+
+    def variance(self, nums: list[float]) -> float:
+        mean = sum(nums) / len(nums)
+        variance = sum((x - mean) ** 2 for x in nums) / len(nums)
+        return variance ** 0.5
     
     def setTable(self, table) -> None:
         if type(table) is str:
@@ -78,7 +83,8 @@ class Grid:
 
         length = max([x.name for x in (self.inputAxes + self.outputAxes)]) + 1
         template = [1 for i in range(length)]
-        combinations = list(itertools.combinations([x for x in range(size + 1)], len(self.inputAxes)))
+        tick = max([x.ticks if isinstance(x, StaticAxis) else 1 for x in self.inputAxes + self.outputAxes])
+        combinations = list(itertools.combinations([x for x in range(-size, size + 1, tick)], len(self.inputAxes)))
 
         for i in range(len(combinations)):
             temp = template[:]
@@ -128,10 +134,9 @@ class Grid:
 
             if img is None:
                 plt.plot(x, y, linewidth=5)
-                plt.savefig("input/output.png", dpi=300)
+                plt.savefig("input/output.png", bbox_inches="tight", dpi=300)
                 img = mpimg.imread("input/output.png")
             else:
-                plt.plot(x, y)
                 for index, value in enumerate(x):
                     width = (max(x) - min(x))/len(x)
                     height = (max(y) - min(y))/len(y)
@@ -144,7 +149,7 @@ class Grid:
                     print(f"{width=} {height=}")
 
                     plt.imshow(img, extent=[value-width/2, value+width/2, y[index]-height/2, y[index]+height/2])
-                plt.savefig("input/output.png", dpi=300)
+                plt.savefig("input/output.png", bbox_inches="tight", dpi=300)
                 img = mpimg.imread("input/output.png")
 
         plt.title(f"Grid: {self.name}")
