@@ -5,6 +5,7 @@ import matplotlib.image as mpimg
 import itertools
 import inspect
 from typing import get_type_hints, Callable
+import math
 
 class StaticAxis:
     def __init__(self, name: int, ticks: int, isInput: bool, label = None) -> None:
@@ -60,10 +61,15 @@ class Grid:
         else:
             self.outputAxes.append(axis)
 
-    def variance(self, nums: list[float]) -> float:
+    def clamp(self, value: float, minVal: float, maxVal: float) -> float:
+        return max(min(value, maxVal), minVal)
+
+    def deviation(self, nums: list[float]) -> float:
         mean = sum(nums) / len(nums)
-        variance = sum((x - mean) ** 2 for x in nums) / len(nums)
-        return variance ** 0.5
+        nums = [abs(x - mean) for x in nums]
+        print(f"{nums=}, {mean=}")
+        std = sum(nums)/(len(nums))
+        return self.clamp(std/abs(max(nums) - min(nums)) if max(nums) != min(nums) else 1.0 + 1, 1, 3)
     
     def setTable(self, table) -> None:
         if type(table) is str:
@@ -143,8 +149,13 @@ class Grid:
 
                     print(f"{width=} {height=}")
 
-                    width = max(y) if width == 0 else width
-                    height = max(x) if height == 0 else height
+                    widthSD = 1 if width == 0 else self.deviation(y)
+                    heightSD = 1 if height == 0 else self.deviation(x)
+                    
+                    print(f"{widthSD=} {heightSD=}")
+
+                    width = max(y) if width == 0 else width * widthSD
+                    height = max(x) if height == 0 else height * heightSD
 
                     print(f"{width=} {height=}")
 
