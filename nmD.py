@@ -5,13 +5,14 @@ import matplotlib.image as mpimg
 import itertools
 import inspect
 from typing import get_type_hints, Callable
-import math
 
 class StaticAxis:
     def __init__(self, name: int, ticks: int, isInput: bool, label = None) -> None:
         self.name = name
         self.ticks = ticks
         self.isInput = isInput
+        if label is None:
+            label = f"Static Axis {name}"
         self.label = label
 
 class DynamicAxis:
@@ -21,6 +22,8 @@ class DynamicAxis:
         if not self.validate_equation(equation):
             raise ValueError("Equation is not valid; must have two list parameters, and must return an float")
         self.equation = equation
+        if label is None:
+            label = f"Dynamic Axis {name}"
         self.label = label
     
     def validate_equation(self, func: Callable) -> bool:
@@ -69,7 +72,7 @@ class Grid:
         nums = [abs(x - mean) for x in nums]
         print(f"{nums=}, {mean=}")
         std = sum(nums)/(len(nums))
-        return self.clamp(std/abs(max(nums) - min(nums)) if max(nums) != min(nums) else 1.0 + 1, 1, 3)
+        return ((std/abs((max(nums) - min(nums))/2) if max(nums) != min(nums) else 1.0) + .5) * 2
     
     def setTable(self, table) -> None:
         if type(table) is str:

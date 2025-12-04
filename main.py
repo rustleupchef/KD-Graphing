@@ -1,4 +1,5 @@
 from nmD import *
+import pandas as pd
 
 def d(nums: list, inputIndices: list) -> float:
     n = [nums[x.name] for x in inputIndices]
@@ -7,15 +8,15 @@ def d(nums: list, inputIndices: list) -> float:
 def main():
     grid = Grid("Test Grid")
     for i in range(2):
-        axis = StaticAxis(name=i, ticks=5, isInput=True, label=f"Input Axis {i}")
+        axis = StaticAxis(name=i, ticks=5, isInput=True)
         grid.addStaticAxis(axis)
     
     for i in range(2, 4):
-        axis = DynamicAxis(name=i, equation=d, isInput=False, label=f"Output Axis {i-5}")
+        axis = DynamicAxis(name=i, equation=d, isInput=False)
         grid.addDynamicAxis(axis)
     
     grid.formTable()
-    print(grid.table)
+    print(pd.DataFrame(grid.table))
     grid.graphTable()
     
 
