@@ -47,6 +47,7 @@ class Grid:
         self.outputAxes = outputAxes
         self.inputAxes = inputAxes
         self.table = table
+        self.inputDict = {}
 
     def addStaticAxis(self, axis: StaticAxis) -> None:
         if axis.name in self.inputAxes or axis.name in self.outputAxes:
@@ -87,6 +88,16 @@ class Grid:
         else:
             raise TypeError("Table must be a filename or a list of lists.")
     
+    def formatInputDict(self, tick,  size, length, index = 1) -> dict:
+        f = {}
+        if length == index:
+            return [x for x in range(-size, size + 1, tick)]
+        
+        for i in range(-size, size + 1, tick):
+            f[i] = self.formatInputDict(tick, size, length, index + 1)
+            index += 1
+        return f
+
     def formTable(self, size: int = 20) -> None:
         self.table = []
 
@@ -106,6 +117,8 @@ class Grid:
             for index, value in enumerate(self.outputAxes):
                 if isinstance(value, DynamicAxis):
                     row[value.name] = value.equation(row, self.inputAxes)
+        
+        self.inputDict = self.formatInputDict(tick, size, len(self.inputAxes))
 
     def graphTable(self) -> None:
         img = None
