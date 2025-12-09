@@ -88,14 +88,14 @@ class Grid:
         else:
             raise TypeError("Table must be a filename or a list of lists.")
     
-    def formatInputDict(self, tick,  size, length, index = 1) -> dict:
+    def formatInputDict(self, tick, size, length, index = 1) -> dict:
         f = {}
         if length == index:
+            print("Base case reached")
             return [x for x in range(-size, size + 1, tick)]
         
         for i in range(-size, size + 1, tick):
             f[i] = self.formatInputDict(tick, size, length, index + 1)
-            index += 1
         return f
 
     def formTable(self, size: int = 20) -> None:
