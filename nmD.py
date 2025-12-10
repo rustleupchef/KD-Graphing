@@ -5,6 +5,7 @@ import matplotlib.image as mpimg
 import itertools
 import inspect
 from typing import get_type_hints, Callable
+import json
 
 class StaticAxis:
     def __init__(self, name: int, ticks: int, isInput: bool, label = None) -> None:
@@ -88,17 +89,33 @@ class Grid:
         else:
             raise TypeError("Table must be a filename or a list of lists.")
     
-    def formatInputDict(self, tick, size, length, index = 1) -> dict:
+    def formatInputDict(self, tick, size, length, index = 1, points = []) -> dict:
         f = {}
         if length == index:
-            print("Base case reached")
-            return [x for x in range(-size, size + 1, tick)]
-        
+            g = {}
+            for point in range(-size, size + 1, tick):
+                d = points[:]
+                d.append(point)
+                g[point] = {"height" : self.outputAxes[index - 1].equation(d, self.inputAxes)}
+            return g
         for i in range(-size, size + 1, tick):
-            f[i] = self.formatInputDict(tick, size, length, index + 1)
+            d = points[:]
+            d.append(i)
+            e = list(itertools.combinations([x for x in range(-size, size + 1, tick)], length - index))
+            g = []
+            for combo in e:
+                temp = d[:]
+                for val in combo:
+                    temp.append(val)
+                g.append(self.outputAxes[index - 1].equation(temp, self.inputAxes))
+            
+            f[i] = {"graph" : self.formatInputDict(tick, size, length, index + 1, d), "height" : g}
         return f
+            
 
     def formTable(self, size: int = 20) -> None:
+        if len(self.inputAxes) != len(self.outputAxes):
+            raise ValueError("Number of input axes must equal number of output axes to form table.")
         self.table = []
 
         length = max([x.name for x in (self.inputAxes + self.outputAxes)]) + 1
@@ -118,7 +135,11 @@ class Grid:
                 if isinstance(value, DynamicAxis):
                     row[value.name] = value.equation(row, self.inputAxes)
         
-        self.inputDict = self.formatInputDict(tick, size, len(self.inputAxes))
+        self.inputDict = self.formatInputDict(tick, size, len(self.inputAxes), points=[])
+        d = json.dumps(self.inputDict, indent=4)
+        with open("input/inputDict.json", "w") as f:
+            f.write(d)
+        
 
     def graphTable(self) -> None:
         if not os.path.exists("input"):
