@@ -121,6 +121,8 @@ class Grid:
         self.inputDict = self.formatInputDict(tick, size, len(self.inputAxes))
 
     def graphTable(self) -> None:
+        if not os.path.exists("input"):
+            os.mkdir("input")
         img = None
         for i in range(max(len(self.inputAxes), len(self.outputAxes))):
             plt.clf()
