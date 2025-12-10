@@ -111,7 +111,48 @@ class Grid:
             
             f[i] = {"graph" : self.formatInputDict(tick, size, length, index + 1, nPoints), "height" : yk}
         return f
+    
+    def graphDynamicTable(self, processDict = None) -> any:
+        plt.clf()
+        if not os.path.exists("input"):
+            os.mkdir("input")
+        
+        if processDict is None:
+            processDict = self.inputDict
+        
+        for key in processDict.keys():
+            point: dict = processDict[key]
+            if not "graph" in point.keys():
+                x = list(processDict.keys())
+                y = [processDict[x]['height'] for x in list(processDict.keys())]
+                plt.xlim(max(x), min(x))
+                plt.ylim(min(y), max(y))
+                print(f"{x=}, {y=}")
+                plt.plot(x, y, linewidth=5)
+                plt.xlabel(self.inputAxes[-1].label)
+                plt.ylabel(self.outputAxes[-1].label)
+                plt.savefig(f"input/output.png", bbox_inches="tight", dpi=300)
+                return mpimg.imread("input/output.png")
+        else:
+
+            images = []
+            for key in processDict.keys():
+                point: dict = processDict[key]
+                subImg = self.graphDynamicTable(point["graph"])
+                width = (max(point["height"]) - min(point["height"]))/len(point["height"])
+                height = (max(point["height"]) - min(point["height"]))/len(point["height"])
+                images.append({"img" : subImg, "width": width, "height": height, "key": key})
             
+            plt.clf()
+            plt.xlim(min(processDict.keys()), max(processDict.keys()))
+            plt.ylim(min([min(processDict[x]["height"]) for x in processDict.keys()]), max([max(processDict[x]["height"]) for x in processDict.keys()]))
+            for image in images:
+                for h in processDict[image["key"]]["height"]:
+                    plt.imshow(image["img"], extent=[image["key"] - image["width"]/2, image["key"] + image["width"]/2, h - image["height"]/2, h + image["height"]/2])
+                    
+
+            plt.savefig(f"input/output.png", bbox_inches="tight", dpi=300)
+            return mpimg.imread("input/output.png")
 
     def formTable(self, size: int = 20) -> None:
         if len(self.inputAxes) != len(self.outputAxes):
@@ -139,6 +180,7 @@ class Grid:
         d = json.dumps(self.inputDict, indent=4)
         with open("input/inputDict.json", "w") as f:
             f.write(d)
+        self.graphDynamicTable()
         
 
     def graphTable(self) -> None:
