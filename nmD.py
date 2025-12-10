@@ -94,22 +94,22 @@ class Grid:
         if length == index:
             g = {}
             for point in range(-size, size + 1, tick):
-                d = points[:]
-                d.append(point)
-                g[point] = {"height" : self.outputAxes[index - 1].equation(d, self.inputAxes)}
+                nPoints = points[:]
+                nPoints.append(point)
+                g[point] = {"height" : self.outputAxes[index - 1].equation(nPoints, self.inputAxes)}
             return g
         for i in range(-size, size + 1, tick):
-            d = points[:]
-            d.append(i)
-            e = list(itertools.combinations([x for x in range(-size, size + 1, tick)], length - index))
-            g = []
-            for combo in e:
-                temp = d[:]
+            nPoints = points[:]
+            nPoints.append(i)
+            combos = list(itertools.combinations([x for x in range(-size, size + 1, tick)], length - index))
+            yk = []
+            for combo in combos:
+                temp = nPoints[:]
                 for val in combo:
                     temp.append(val)
-                g.append(self.outputAxes[index - 1].equation(temp, self.inputAxes))
+                yk.append(self.outputAxes[index - 1].equation(temp, self.inputAxes))
             
-            f[i] = {"graph" : self.formatInputDict(tick, size, length, index + 1, d), "height" : g}
+            f[i] = {"graph" : self.formatInputDict(tick, size, length, index + 1, nPoints), "height" : yk}
         return f
             
 
