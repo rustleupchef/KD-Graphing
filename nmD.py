@@ -134,7 +134,6 @@ class Grid:
                 plt.savefig(f"input/output.png", bbox_inches="tight", dpi=300)
                 return mpimg.imread("input/output.png")
         else:
-
             images = []
             for key in processDict.keys():
                 point: dict = processDict[key]
@@ -143,12 +142,21 @@ class Grid:
                 height = (max(point["height"]) - min(point["height"]))/len(point["height"])
                 images.append({"img" : subImg, "width": width, "height": height, "key": key})
             
+            X = []
+            Y = []
+            for image in images:
+                for h in processDict[image["key"]]["height"]:
+                    X.append(image["key"])
+                    Y.append(h)
+            
             plt.clf()
             plt.xlim(min(processDict.keys()), max(processDict.keys()))
             plt.ylim(min([min(processDict[x]["height"]) for x in processDict.keys()]), max([max(processDict[x]["height"]) for x in processDict.keys()]))
             for image in images:
                 for h in processDict[image["key"]]["height"]:
-                    plt.imshow(image["img"], extent=[image["key"] - image["width"]/2, image["key"] + image["width"]/2, h - image["height"]/2, h + image["height"]/2])
+                    width = image["width"] * self.deviation(Y)
+                    height = image["height"] * self.deviation(X)
+                    plt.imshow(image["img"], extent=[image["key"] - width/2, image["key"] + width/2, h - height/2, h + height/2])
                     
 
             plt.savefig(f"input/output.png", bbox_inches="tight", dpi=300)
