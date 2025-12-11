@@ -125,13 +125,14 @@ class Grid:
             if not "graph" in point.keys():
                 x = list(processDict.keys())
                 y = [processDict[x]['height'] for x in list(processDict.keys())]
+                plt.tight_layout()
                 plt.xlim(max(x), min(x))
                 plt.ylim(min(y), max(y))
                 print(f"{x=}, {y=}")
                 plt.plot(x, y, linewidth=5)
                 plt.xlabel(self.inputAxes[-1].label)
                 plt.ylabel(self.outputAxes[-1].label)
-                plt.savefig(f"input/output.png", bbox_inches="tight", dpi=300)
+                plt.savefig(f"input/output.png", dpi=300)
                 return mpimg.imread("input/output.png")
         else:
             images = []
@@ -152,14 +153,14 @@ class Grid:
             plt.clf()
             plt.xlim(min(processDict.keys()), max(processDict.keys()))
             plt.ylim(min([min(processDict[x]["height"]) for x in processDict.keys()]), max([max(processDict[x]["height"]) for x in processDict.keys()]))
+            plt.tight_layout()
             for image in images:
                 for h in processDict[image["key"]]["height"]:
                     width = image["width"] * self.deviation(Y)
-                    height = image["height"] * self.deviation(X)
+                    height = (max(processDict[image["key"]]["height"]) - min(processDict[image["key"]]["height"])) / len(processDict[image["key"]]["height"]) * self.deviation(X)
                     plt.imshow(image["img"], extent=[image["key"] - width/2, image["key"] + width/2, h - height/2, h + height/2])
-                    
 
-            plt.savefig(f"input/output.png", bbox_inches="tight", dpi=300)
+            plt.savefig(f"input/output.png", dpi=300)
             return mpimg.imread("input/output.png")
 
     def formTable(self, size: int = 20) -> None:
@@ -189,6 +190,10 @@ class Grid:
         with open("input/inputDict.json", "w") as f:
             f.write(d)
         self.graphDynamicTable()
+        plt.title(f"Grid: {self.name}")
+        plt.xticks(rotation=45, ha='right')
+        plt.tight_layout()
+        plt.show()
         
 
     def graphTable(self) -> None:

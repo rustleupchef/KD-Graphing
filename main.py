@@ -2,7 +2,7 @@ from nmD import *
 import pandas as pd
 
 def d(nums: list, inputIndices: list) -> float:
-    return sum([nums[x.name] for x in inputIndices])
+    return nums[0] ** 2 + nums[1] ** 2 + nums[2] ** 2
 
 def main():
     grid = Grid("Test Grid")
