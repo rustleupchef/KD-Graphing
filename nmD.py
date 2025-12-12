@@ -74,7 +74,7 @@ class Grid:
         nums = [abs(x - mean) for x in nums]
         print(f"{nums=}, {mean=}")
         std = sum(nums)/(len(nums))
-        return ((std/abs((max(nums) - min(nums))/2) if max(nums) != min(nums) else 1.0) + .5) * 2
+        return ((std/abs((max(nums) - min(nums))/2) if max(nums) != min(nums) else 1.0) + .5) * 4
     
     def setTable(self, table) -> None:
         if type(table) is str:
@@ -132,16 +132,14 @@ class Grid:
                 plt.plot(x, y, linewidth=5)
                 plt.xlabel(self.inputAxes[-1].label)
                 plt.ylabel(self.outputAxes[-1].label)
-                plt.savefig(f"input/output.png", dpi=300)
+                plt.savefig(f"input/output.png", bbox_inches="tight", dpi=200)
                 return mpimg.imread("input/output.png")
         else:
             images = []
             for key in processDict.keys():
                 point: dict = processDict[key]
                 subImg = self.graphDynamicTable(point["graph"])
-                width = (max(point["height"]) - min(point["height"]))/len(point["height"])
-                height = (max(point["height"]) - min(point["height"]))/len(point["height"])
-                images.append({"img" : subImg, "width": width, "height": height, "key": key})
+                images.append({"img" : subImg, "key": key})
             
             X = []
             Y = []
@@ -156,11 +154,11 @@ class Grid:
             plt.tight_layout()
             for image in images:
                 for h in processDict[image["key"]]["height"]:
-                    width = image["width"] * self.deviation(Y)
-                    height = (max(processDict[image["key"]]["height"]) - min(processDict[image["key"]]["height"])) / len(processDict[image["key"]]["height"]) * self.deviation(X)
-                    plt.imshow(image["img"], extent=[image["key"] - width/2, image["key"] + width/2, h - height/2, h + height/2])
+                    width = abs(max(X) - min(X))/len(X) * self.deviation(Y)
+                    height = abs(max(Y) - min(Y))/len(Y) * self.deviation(X)
+                    plt.imshow(image["img"], extent=[image["key"] - width/2, image["key"] + width/2, h - height/2, h + height/2], aspect='auto')
 
-            plt.savefig(f"input/output.png", dpi=300)
+            plt.savefig(f"input/output.png", bbox_inches="tight", dpi=200)
             return mpimg.imread("input/output.png")
 
     def formTable(self, size: int = 20) -> None:
