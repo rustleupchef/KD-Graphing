@@ -74,7 +74,7 @@ class Grid:
         nums = [abs(x - mean) for x in nums]
         print(f"{nums=}, {mean=}")
         std = sum(nums)/(len(nums))
-        return ((std/abs((max(nums) - min(nums))/2) if max(nums) != min(nums) else 1.0) + .5) * 4
+        return ((std/abs((max(nums) - min(nums))/2) if max(nums) != min(nums) else 1.0) + .5)
     
     def setTable(self, table) -> None:
         if type(table) is str:
@@ -141,21 +141,26 @@ class Grid:
                 subImg = self.graphDynamicTable(point["graph"])
                 images.append({"img" : subImg, "key": key})
             
-            X = []
+            X = list(set(processDict.keys()))
             Y = []
             for image in images:
                 for h in processDict[image["key"]]["height"]:
-                    X.append(image["key"])
                     Y.append(h)
+            Y = list(set(Y))
+            Y = Y if len(Y) > 1 else Y + [-Y[0]]
             
             plt.clf()
-            plt.xlim(min(processDict.keys()), max(processDict.keys()))
-            plt.ylim(min([min(processDict[x]["height"]) for x in processDict.keys()]), max([max(processDict[x]["height"]) for x in processDict.keys()]))
+            plt.xlim(min(X), max(X))
+            plt.ylim(min(Y), max(Y))
             plt.tight_layout()
+
+            width = abs(max(X) - min(X))/len(X) * self.deviation(Y)
+            height = abs(max(Y) - min(Y))/len(Y) * self.deviation(X)
+
+            print(f"{width=} {height=}")
+
             for image in images:
                 for h in processDict[image["key"]]["height"]:
-                    width = abs(max(X) - min(X))/len(X) * self.deviation(Y)
-                    height = abs(max(Y) - min(Y))/len(Y) * self.deviation(X)
                     plt.imshow(image["img"], extent=[image["key"] - width/2, image["key"] + width/2, h - height/2, h + height/2], aspect='auto')
 
             plt.savefig(f"input/output.png", bbox_inches="tight", dpi=200)
