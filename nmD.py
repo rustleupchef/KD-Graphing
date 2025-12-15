@@ -262,26 +262,3 @@ class Grid:
 
         plt.title(f"Grid: {self.name}")
         plt.show()
-
-def main(args=None):
-    if len(args) != 2:
-        raise ValueError("Two arguments required: table filename and grid name.")
-    grid = Grid(name=args[1])
-    grid.setTable(args[0])
-    table = grid.table
-
-    if len(table) == 0 or len(table[0]) == 0:
-        raise ValueError("Table cannot be empty.")
-    
-    threshold = len(table[0]) // 2
-    for i in range(len(table[0])):
-        axis = StaticAxis(name=i, ticks=5, isInput=(i < threshold), label= f"x{i}" if i < threshold else f"y{i - threshold}")
-        grid.addStaticAxis(axis)
-    
-    print([axis.name for axis in grid.inputAxes])
-    print([axis.name for axis in grid.outputAxes])
-
-    grid.formTable()
-
-if __name__ == "__main__":
-    main(args=sys.argv[1:])
